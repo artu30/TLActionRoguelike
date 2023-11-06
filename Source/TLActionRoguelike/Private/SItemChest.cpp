@@ -1,6 +1,5 @@
-#include "Components/StaticMeshComponent.h"
-
 #include "SItemChest.h"
+#include "Components/StaticMeshComponent.h"
 
 // Sets default values
 ASItemChest::ASItemChest()

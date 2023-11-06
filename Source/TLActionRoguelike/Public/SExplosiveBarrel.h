@@ -1,6 +1,5 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "PhysicsEngine/RadialForceComponent.h"
 #include "SExplosiveBarrel.generated.h"
 
 class UStaticMeshComponent;
@@ -38,6 +37,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
-	void Explode();
+	void Explode(AActor* OtherActor);
 	
 };

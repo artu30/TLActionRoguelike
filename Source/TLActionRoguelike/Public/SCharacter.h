@@ -7,23 +7,13 @@
 class USpringArmComponent;
 class UCameraComponent;
 class USInteractionComponent;
-class UAnimMontage;
+class USAttackComponent;
 
 UCLASS()
 class TLACTIONROGUELIKE_API ASCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-protected:
-	
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	TSubclassOf<AActor> ProjectileClass;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	UAnimMontage* AttackAnim;
-
-	FTimerHandle TimerHandlePrimaryAttack;
-	
 public:
 	
 	// Sets default values for this character's properties
@@ -39,6 +29,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	USInteractionComponent* InteractionComp;
+
+	UPROPERTY(VisibleAnywhere)
+	USAttackComponent* AttackComp;
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -48,8 +41,8 @@ protected:
 	void MoveRight(float Value);
 
 	void PrimaryAttack();
-
-	void PrimaryAttack_TimeElapsed();
+	void BlackholeAttack();
+	void TeleportAttack();
 
 	void PrimaryInteract();
 
@@ -60,5 +53,11 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	FVector GetAttackStartLocation() const;
+
+	FVector GetAttackEndLocation() const;
+
+	FRotator GetAttackStartRotation() const;
 
 };

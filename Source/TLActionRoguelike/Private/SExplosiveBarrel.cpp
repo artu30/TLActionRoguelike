@@ -1,4 +1,5 @@
 #include "SExplosiveBarrel.h"
+#include "PhysicsEngine/RadialForceComponent.h"
 
 // Sets default values
 ASExplosiveBarrel::ASExplosiveBarrel()
@@ -36,7 +37,7 @@ void ASExplosiveBarrel::PostInitializeComponents()
 
 void ASExplosiveBarrel::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	Explode();
+	Explode(OtherActor);
 }
 
 // Called every frame
@@ -46,8 +47,10 @@ void ASExplosiveBarrel::Tick(float DeltaTime)
 
 }
 
-void ASExplosiveBarrel::Explode()
+void ASExplosiveBarrel::Explode(AActor* OtherActor)
 {
 	RadialForceComp->FireImpulse();
+	
+	UE_LOG(LogTemp, Log, TEXT("Explosive Barrel - OtherActor: %s, at game time: %f"), *GetNameSafe(OtherActor), GetWorld()->TimeSeconds);
 }
 
