@@ -21,7 +21,7 @@ public:
 
 protected:
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Projectile")
 	float TimeToTeleport = 0.2f;
 
 	FTimerHandle TimerHandleTeleport;

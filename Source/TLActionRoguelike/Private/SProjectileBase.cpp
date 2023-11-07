@@ -1,4 +1,6 @@
 #include "SProjectileBase.h"
+
+#include "SAttributeComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -30,7 +32,7 @@ void ASProjectileBase::BeginPlay()
 
 	AActor* ActorInstigator = Cast<AActor>(GetInstigator());
 	SphereComp->IgnoreActorWhenMoving(ActorInstigator, true);
-	SphereComp->OnComponentHit.AddDynamic(this, &ASProjectileBase::OnHit);
+	SphereComp->OnComponentHit.AddDynamic(this, &ASProjectileBase::OnActorHit);
 	
 	FTimerDelegate DetonationDelegate = FTimerDelegate::CreateUObject(this, &ASProjectileBase::OnDetonateProjectile);
 	GetWorldTimerManager().SetTimer(TimerHandleDetonation, DetonationDelegate, TimeToDetonation, false);
@@ -48,11 +50,19 @@ void ASProjectileBase::SpawnImpactVFX()
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactVFX, GetActorLocation(), GetActorRotation(), false);
 }
 
-void ASProjectileBase::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	AActor* ActorInstigator = Cast<AActor>(GetInstigator());
-	if (ActorInstigator && OtherActor != ActorInstigator)
+	if (OtherActor != ActorInstigator)
 	{
 		OnDetonateProjectile();
+		
+		USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
+		if (!AttributeComp || !OtherActor)
+		{
+			return;
+		}
+
+		AttributeComp->ApplyHealthChange(-20.f);
 	}
 }

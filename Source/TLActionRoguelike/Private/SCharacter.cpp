@@ -5,6 +5,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "SInteractionComponent.h"
 #include "SAttackComponent.h"
+#include "SAttributeComponent.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -19,9 +20,11 @@ ASCharacter::ASCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 
-	InteractionComp = CreateDefaultSubobject<USInteractionComponent>("InteractionComp");
+	InteractionComp = CreateDefaultSubobject<USInteractionComponent>(TEXT("InteractionComp"));
 
-	AttackComp = CreateDefaultSubobject<USAttackComponent>("AttackComp");
+	AttackComp = CreateDefaultSubobject<USAttackComponent>(TEXT("AttackComp"));
+
+	AttributeComp = CreateDefaultSubobject<USAttributeComponent>(TEXT("AttributeComp"));
 	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	
@@ -32,7 +35,8 @@ ASCharacter::ASCharacter()
 void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	AttributeComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnCharacterHealthChanged);
 }
 
 void ASCharacter::MoveForward(float Value)
@@ -96,6 +100,15 @@ void ASCharacter::PrimaryInteract()
 	}
 	
 	InteractionComp->PrimaryInteract();
+}
+
+void ASCharacter::OnCharacterHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
+{
+	if (NewHealth <= 0.f && Delta < 0.f)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		DisableInput(PC);
+	}
 }
 
 // Called every frame

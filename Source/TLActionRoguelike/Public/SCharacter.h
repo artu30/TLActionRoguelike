@@ -8,6 +8,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class USInteractionComponent;
 class USAttackComponent;
+class USAttributeComponent;
 
 UCLASS()
 class TLACTIONROGUELIKE_API ASCharacter : public ACharacter
@@ -32,6 +33,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	USAttackComponent* AttackComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USAttributeComponent* AttributeComp;
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,6 +49,9 @@ protected:
 	void TeleportAttack();
 
 	void PrimaryInteract();
+
+	UFUNCTION()
+	void OnCharacterHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 
 public:
 	

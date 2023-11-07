@@ -42,6 +42,8 @@ void USAttackComponent::TeleportAttack(UWorld* World)
 
 void USAttackComponent::AttackFromHand_TimeElapsed(TSubclassOf<AActor> ProjectileClass, UWorld* World)
 {
+	ensure(ProjectileClass);
+	
 	ASCharacter* CharacterOwner = Cast<ASCharacter>(GetOwner());
 	if (!CharacterOwner)
 	{

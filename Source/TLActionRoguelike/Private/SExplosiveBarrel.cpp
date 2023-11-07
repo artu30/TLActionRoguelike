@@ -1,4 +1,5 @@
 #include "SExplosiveBarrel.h"
+#include "SAttributeComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 
 // Sets default values
@@ -25,19 +26,26 @@ ASExplosiveBarrel::ASExplosiveBarrel()
 void ASExplosiveBarrel::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	ExplosiveBarrelMesh->OnComponentHit.AddDynamic(this, &ASExplosiveBarrel::OnHitBarrel);
 }
 
-void ASExplosiveBarrel::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-	
-	ExplosiveBarrelMesh->OnComponentHit.AddDynamic(this, &ASExplosiveBarrel::OnHit);
-}
-
-void ASExplosiveBarrel::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void ASExplosiveBarrel::OnHitBarrel(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Explode(OtherActor);
+
+	if (!OtherActor)
+	{
+		return;
+	}
+
+	USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
+	if (!AttributeComp)
+	{
+		return;
+	}
+
+	AttributeComp->ApplyHealthChange(-50.f);
 }
 
 // Called every frame
