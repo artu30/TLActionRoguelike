@@ -1,4 +1,5 @@
 #include "SPowerup.h"
+
 #include "Components/SphereComponent.h"
 
 // Sets default values

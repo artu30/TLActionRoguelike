@@ -1,4 +1,5 @@
 #include "STargetDummy.h"
+
 #include "SAttributeComponent.h"
 
 // Sets default values

@@ -1,4 +1,5 @@
 #include "SExplosiveBarrel.h"
+
 #include "SAttributeComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 

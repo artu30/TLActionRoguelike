@@ -1,8 +1,8 @@
 #include "STeleportProjectile.h"
+
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "SCharacter.h"
-#include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 ASTeleportProjectile::ASTeleportProjectile()
