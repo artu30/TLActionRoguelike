@@ -30,7 +30,7 @@ void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent,
 		return;
 	}
 
-	AttributeComp->ApplyHealthChange(-20.f);
+	AttributeComp->ApplyHealthChange(HitDamage);
 
 	OnDetonateProjectile();
 }

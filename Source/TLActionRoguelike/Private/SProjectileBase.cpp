@@ -1,10 +1,11 @@
 #include "SProjectileBase.h"
-
 #include "SAttributeComponent.h"
+#include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ASProjectileBase::ASProjectileBase()
@@ -23,6 +24,9 @@ ASProjectileBase::ASProjectileBase()
 	MovementComp->InitialSpeed = 1000.f;
 	MovementComp->bRotationFollowsVelocity = true;
 	MovementComp->bInitialVelocityInLocalSpace = true;
+
+	AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComp"));
+	AudioComp->SetupAttachment(SphereComp);
 }
 
 // Called when the game starts or when spawned
@@ -40,6 +44,13 @@ void ASProjectileBase::BeginPlay()
 
 void ASProjectileBase::OnDetonateProjectile()
 {
+	if (IsValid(CameraShake))
+	{
+		UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShake, GetActorLocation(), CameraShakeMinRadius, CameraShakeMaxRadius);
+	}
+	
+	SpawnImpactSound();
+	
 	SpawnImpactVFX();
 
 	OnDestroyProjectile();
@@ -47,7 +58,22 @@ void ASProjectileBase::OnDetonateProjectile()
 
 void ASProjectileBase::SpawnImpactVFX()
 {
+	if (!ImpactVFX)
+	{
+		return;
+	}
+	
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactVFX, GetActorLocation(), GetActorRotation(), false);
+}
+
+void ASProjectileBase::SpawnImpactSound()
+{
+	if (!ImpactSound)
+	{
+		return;
+	}
+	
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, GetActorLocation(), GetActorRotation());
 }
 
 void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -63,6 +89,6 @@ void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* Oth
 			return;
 		}
 
-		AttributeComp->ApplyHealthChange(-20.f);
+		AttributeComp->ApplyHealthChange(HitDamage);
 	}
 }

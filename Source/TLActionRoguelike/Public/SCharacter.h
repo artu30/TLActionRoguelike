@@ -36,7 +36,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USAttributeComponent* AttributeComp;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SProjectile")
+	UParticleSystem* CastSpellHandleVFX;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -66,5 +69,10 @@ public:
 	FVector GetAttackEndLocation() const;
 
 	FRotator GetAttackStartRotation() const;
+
+	UFUNCTION(BlueprintCallable)
+	USAttributeComponent* GetAttributeComponent() const;
+
+	void SpawnCastSpellHandVFX();
 
 };

@@ -59,4 +59,6 @@ void USAttackComponent::AttackFromHand_TimeElapsed(TSubclassOf<AActor> Projectil
 	SpawnParams.Instigator = CharacterOwner;
 	
 	World->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+
+	CharacterOwner->SpawnCastSpellHandVFX();
 }

@@ -6,6 +6,7 @@
 #include "SInteractionComponent.h"
 #include "SAttackComponent.h"
 #include "SAttributeComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -65,7 +66,7 @@ void ASCharacter::PrimaryAttack()
 	{
 		return;
 	}
-	
+
 	PlayAnimMontage(AttackComp->GetMagicProjectileAttackAnim());
 	AttackComp->PrimaryAttack(GetWorld());
 }
@@ -76,7 +77,7 @@ void ASCharacter::BlackholeAttack()
 	{
 		return;
 	}
-	
+
 	PlayAnimMontage(AttackComp->GetBlackholeProjectileAttackAnim());
 	AttackComp->BlackholeAttack(GetWorld());
 }
@@ -87,7 +88,7 @@ void ASCharacter::TeleportAttack()
 	{
 		return;
 	}
-	
+
 	PlayAnimMontage(AttackComp->GetTeleportProjectileAttackAnim());
 	AttackComp->TeleportAttack(GetWorld());
 }
@@ -108,6 +109,10 @@ void ASCharacter::OnCharacterHealthChanged(AActor* InstigatorActor, USAttributeC
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		DisableInput(PC);
+	}
+	else if (Delta < 0.f)
+	{
+		GetMesh()->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->TimeSeconds);
 	}
 }
 
@@ -187,4 +192,22 @@ FVector ASCharacter::GetAttackEndLocation() const
 FRotator ASCharacter::GetAttackStartRotation() const
 {
 	return UKismetMathLibrary::FindLookAtRotation(GetAttackStartLocation(), GetAttackEndLocation());
+}
+
+USAttributeComponent* ASCharacter::GetAttributeComponent() const
+{
+	return AttributeComp;
+}
+
+void ASCharacter::SpawnCastSpellHandVFX()
+{
+	if (!CastSpellHandleVFX)
+	{
+		return;
+	}
+
+	FVector VFXLocation = GetAttackStartLocation();
+	FRotator VFXRotation = GetMesh()->GetSocketRotation(TEXT("Muzzle_01"));
+	
+	UGameplayStatics::SpawnEmitterAttached(CastSpellHandleVFX, GetMesh(), "Muzzle_01", VFXLocation, VFXRotation, FVector(1), EAttachLocation::KeepWorldPosition);
 }

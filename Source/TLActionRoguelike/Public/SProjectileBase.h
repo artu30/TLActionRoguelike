@@ -2,12 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Particles/ParticleEmitter.h"
 #include "SProjectileBase.generated.h"
 
 class USphereComponent;
 class UProjectileMovementComponent;
 class UParticleSystemComponent;
+class UAudioComponent;
+class USoundCue;
+class USoundBase;
+class UCameraShakeBase;
 
 UCLASS()
 class TLACTIONROGUELIKE_API ASProjectileBase : public AActor
@@ -26,14 +29,32 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UProjectileMovementComponent* MovementComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SProjectile")
 	UParticleSystem* ImpactVFX;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UParticleSystemComponent* EffectComp;
 
-	UPROPERTY(EditAnywhere, Category = "Projectile")
+	UPROPERTY(VisibleAnywhere)
+	UAudioComponent* AudioComp;
+
+	UPROPERTY(EditAnywhere,  Category = "SProjectile")
+	USoundBase* ImpactSound;
+
+	UPROPERTY(EditAnywhere, Category = "SProjectile")
 	float TimeToDetonation = 2.f;
+
+	UPROPERTY(EditAnywhere, Category = "SProjectile")
+	float HitDamage = -20.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "SProjectile")
+	TSubclassOf<UCameraShakeBase> CameraShake;
+
+	UPROPERTY(EditAnywhere, Category = "SProjectile")
+	float CameraShakeMinRadius = 500.f;
+
+	UPROPERTY(EditAnywhere, Category = "SProjectile")
+	float CameraShakeMaxRadius = 2000.f;
 
 	FTimerHandle TimerHandleDetonation;
 	
@@ -43,6 +64,8 @@ protected:
 	void OnDetonateProjectile();
 
 	virtual void SpawnImpactVFX();
+
+	virtual void SpawnImpactSound();
 
 	virtual void OnDestroyProjectile() { Destroy(); };
 
