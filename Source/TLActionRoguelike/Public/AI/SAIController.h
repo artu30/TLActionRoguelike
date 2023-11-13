@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "BehaviorTree/BehaviorTreeTypes.h"
 #include "SAIController.generated.h"
 
 class UBehaviorTree;
@@ -18,7 +19,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	UBehaviorTree* BehaviorTree;
-	
+
 	virtual void BeginPlay() override;
 	
 };

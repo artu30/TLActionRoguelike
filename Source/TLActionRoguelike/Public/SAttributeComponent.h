@@ -24,6 +24,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
 	float MaxHealth = 100.f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	float LowHealthAmount = 20.f;
+
 public:
 
 	UPROPERTY(BlueprintAssignable)
@@ -32,11 +35,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	bool ApplyHealthChange(float Delta);
 
+	bool FullHeal();
+
 	UFUNCTION(BlueprintCallable)
 	bool IsAlive() const;
 
 	float GetMaxHealth() const { return MaxHealth; }
 
 	bool IsFullHealth() const { return Health >= MaxHealth; }
+
+	bool IsLowHealth() const { return Health <= LowHealthAmount; }
 	
 };

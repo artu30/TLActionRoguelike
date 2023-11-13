@@ -23,6 +23,19 @@ bool USAttributeComponent::ApplyHealthChange(float Delta)
 	return CurrentDelta != 0.f;
 }
 
+bool USAttributeComponent::FullHeal()
+{
+	const float CurrentHealth = Health;
+	
+	Health = MaxHealth;
+
+	const float CurrentDelta = Health - CurrentHealth;
+	
+	OnHealthChanged.Broadcast(nullptr, this, Health, CurrentDelta);
+
+	return CurrentDelta != 0.f;
+}
+
 bool USAttributeComponent::IsAlive() const
 {
 	return Health > 0.f;

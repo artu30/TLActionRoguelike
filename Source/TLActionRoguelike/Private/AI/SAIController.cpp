@@ -7,15 +7,8 @@ void ASAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	RunBehaviorTree(BehaviorTree);
-
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-	if (!PlayerPawn)
+	if (ensureMsgf(BehaviorTree, TEXT("Behavior Tree is nullptr! Please assign BehaviorTree in your AI Controller")))
 	{
-		return;
+		RunBehaviorTree(BehaviorTree);
 	}
-
-	GetBlackboardComponent()->SetValueAsVector("MoveToLocation", PlayerPawn->GetActorLocation());
-
-	GetBlackboardComponent()->SetValueAsObject("TargetActor", PlayerPawn);
 }
