@@ -1,6 +1,7 @@
 #include "AI/SBTTaskRangeAttack.h"
 
 #include "AIController.h"
+#include "SAttributeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
 
@@ -24,8 +25,13 @@ EBTNodeResult::Type USBTTaskRangeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 		return EBTNodeResult::Failed;
 	}
 
-	const AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject("TargetActor"));
+	AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject("TargetActor"));
 	if (!TargetActor)
+	{
+		return EBTNodeResult::Failed;
+	}
+
+	if (!USAttributeComponent::IsActorAlive(TargetActor))
 	{
 		return EBTNodeResult::Failed;
 	}
@@ -33,7 +39,10 @@ EBTNodeResult::Type USBTTaskRangeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 	const FVector MuzzleLocation = Pawn->GetMesh()->GetSocketLocation("Muzzle_01");
 
 	const FVector Direction = TargetActor->GetActorLocation() - MuzzleLocation;
-	const FRotator MuzzleRotation = Direction.Rotation();
+	FRotator MuzzleRotation = Direction.Rotation();
+
+	MuzzleRotation.Pitch += FMath::RandRange(0.f, MaxBulletsSpread);
+	MuzzleRotation.Yaw += FMath::RandRange(-MaxBulletsSpread, MaxBulletsSpread);
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;

@@ -1,6 +1,7 @@
 #include "STargetDummy.h"
 
 #include "SAttributeComponent.h"
+#include "SDamagePopupUserWidget.h"
 
 // Sets default values
 ASTargetDummy::ASTargetDummy()
@@ -27,6 +28,17 @@ void ASTargetDummy::OnTargetDummyHealthChanged(AActor* InstigatorActor, USAttrib
 	if (Delta >= 0.f)
 	{
 		return;
+	}
+
+	if (DamagePopUp == nullptr)
+	{
+		DamagePopUp = CreateWidget<USDamagePopupUserWidget>(GetWorld(), DamagePopUpWidgetClass);
+		if (DamagePopUp)
+		{
+			DamagePopUp->AttachedActor = this;
+			DamagePopUp->TextToShow = FMath::Abs(Delta);
+			DamagePopUp->AddToViewport();
+		}
 	}
 	
 	MeshComp->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->TimeSeconds);

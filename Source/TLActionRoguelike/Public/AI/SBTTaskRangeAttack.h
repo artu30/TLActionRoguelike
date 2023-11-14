@@ -15,7 +15,10 @@ class TLACTIONROGUELIKE_API USBTTaskRangeAttack : public UBTTaskNode
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 protected:
-
+	
+	UPROPERTY(EditAnywhere, Category = "AI")
+	float MaxBulletsSpread = 2.f;
+	
 	UPROPERTY(EditAnywhere, Category = "AI")
 	TSubclassOf<AActor> ProjectileClass;
 	

@@ -46,7 +46,7 @@ void ASExplosiveBarrel::OnHitBarrel(UPrimitiveComponent* HitComponent, AActor* O
 		return;
 	}
 
-	AttributeComp->ApplyHealthChange(-50.f);
+	AttributeComp->ApplyHealthChange(this, HitDamage);
 }
 
 // Called every frame

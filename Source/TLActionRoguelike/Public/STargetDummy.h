@@ -5,6 +5,7 @@
 #include "STargetDummy.generated.h"
 
 class USAttributeComponent;
+class USDamagePopupUserWidget;
 
 UCLASS()
 class TLACTIONROGUELIKE_API ASTargetDummy : public AActor
@@ -23,6 +24,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* MeshComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> DamagePopUpWidgetClass;
+	
+	UPROPERTY()
+	USDamagePopupUserWidget* DamagePopUp;
 
 	virtual void BeginPlay() override;
 	

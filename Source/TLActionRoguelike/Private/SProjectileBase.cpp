@@ -79,6 +79,11 @@ void ASProjectileBase::SpawnImpactSound()
 
 void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (!OtherActor)
+	{
+		return;
+	}
+	
 	AActor* ActorInstigator = Cast<AActor>(GetInstigator());
 	if (OtherActor != ActorInstigator)
 	{
@@ -90,6 +95,6 @@ void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* Oth
 			return;
 		}
 
-		AttributeComp->ApplyHealthChange(HitDamage);
+		AttributeComp->ApplyHealthChange(ActorInstigator, HitDamage);
 	}
 }

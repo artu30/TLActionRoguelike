@@ -25,6 +25,9 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	URadialForceComponent* RadialForceComp;
 
+	UPROPERTY(EditAnywhere, Category = "ExplosiveBarrel")
+	float HitDamage = -50.f;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

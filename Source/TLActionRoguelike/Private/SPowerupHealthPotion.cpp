@@ -28,7 +28,7 @@ void ASPowerupHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 		return;
 	}
 
-	if (!AttributeComp->ApplyHealthChange(HealthAmount))
+	if (!AttributeComp->ApplyHealthChange(this, HealthAmount))
 	{
 		return;
 	}
