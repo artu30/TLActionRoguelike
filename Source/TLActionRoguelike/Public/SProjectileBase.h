@@ -57,9 +57,8 @@ protected:
 	float CameraShakeMaxRadius = 2000.f;
 
 	FTimerHandle TimerHandleDetonation;
-	
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+
+	virtual void PostInitializeComponents() override;
 
 	void OnDetonateProjectile();
 

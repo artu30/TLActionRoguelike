@@ -16,13 +16,15 @@ ASProjectileBase::ASProjectileBase()
 
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	SphereComp->SetCollisionProfileName(TEXT("Projectile"));
+	SphereComp->SetCanEverAffectNavigation(false);
 	RootComponent = SphereComp;
 
 	EffectComp  = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("EffectComp"));
 	EffectComp->SetupAttachment(SphereComp);
 
 	MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MovementComp"));
-	MovementComp->InitialSpeed = 1000.f;
+	MovementComp->InitialSpeed = 8000.f;
+	MovementComp->ProjectileGravityScale = 0.0f;
 	MovementComp->bRotationFollowsVelocity = true;
 	MovementComp->bInitialVelocityInLocalSpace = true;
 
@@ -30,15 +32,12 @@ ASProjectileBase::ASProjectileBase()
 	AudioComp->SetupAttachment(SphereComp);
 }
 
-// Called when the game starts or when spawned
-void ASProjectileBase::BeginPlay()
+void ASProjectileBase::PostInitializeComponents()
 {
-	Super::BeginPlay();
+	Super::PostInitializeComponents();
 
-	AActor* ActorInstigator = Cast<AActor>(GetInstigator());
-	SphereComp->IgnoreActorWhenMoving(ActorInstigator, true);
 	SphereComp->OnComponentHit.AddDynamic(this, &ASProjectileBase::OnActorHit);
-	
+
 	FTimerDelegate DetonationDelegate = FTimerDelegate::CreateUObject(this, &ASProjectileBase::OnDetonateProjectile);
 	GetWorldTimerManager().SetTimer(TimerHandleDetonation, DetonationDelegate, TimeToDetonation, false);
 }
@@ -79,22 +78,5 @@ void ASProjectileBase::SpawnImpactSound()
 
 void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (!OtherActor)
-	{
-		return;
-	}
-	
-	AActor* ActorInstigator = Cast<AActor>(GetInstigator());
-	if (OtherActor != ActorInstigator)
-	{
-		OnDetonateProjectile();
-		
-		USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
-		if (!AttributeComp || !OtherActor)
-		{
-			return;
-		}
-
-		AttributeComp->ApplyHealthChange(ActorInstigator, HitDamage);
-	}
+	OnDetonateProjectile();
 }

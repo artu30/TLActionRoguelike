@@ -33,6 +33,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
 	float LowHealthAmount = 20.f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	int32 CoinsOnDeathAmount = 10;
+
 public:
 
 	UPROPERTY(BlueprintAssignable)
@@ -51,5 +54,8 @@ public:
 	bool IsFullHealth() const { return Health >= MaxHealth; }
 
 	bool IsLowHealth() const { return Health <= LowHealthAmount; }
+
+	UFUNCTION(BlueprintCallable)
+	bool Kill(AActor* InstigatorActor);
 	
 };

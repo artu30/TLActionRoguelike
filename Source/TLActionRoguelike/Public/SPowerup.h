@@ -22,8 +22,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USphereComponent* SphereComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* PowerupMesh;
+
 	UPROPERTY(EditAnywhere, Category = "Powerup")
 	float RespawnTime = 10.f;
+
+	UPROPERTY(EditAnywhere, Category = "Powerup")
+	int32 CreditsCostAmount = 0;
 
 	FTimerHandle TimerHandleShowPowerup;
 
@@ -35,6 +41,12 @@ protected:
 
 public:
 
+	bool CanInteractPowerup(APawn* InstigatorPawn);
+	
 	void Interact_Implementation(APawn* InstigatorPawn);
+
+	bool CanTakePowerup(APawn* InstigatorPawn);
+
+	void ApplyCoinsCost(APawn* InstigatorPawn);
 
 };

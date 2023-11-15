@@ -9,6 +9,7 @@ class UCameraComponent;
 class USInteractionComponent;
 class USAttackComponent;
 class USAttributeComponent;
+class USActionComponent;
 
 UCLASS()
 class TLACTIONROGUELIKE_API ASCharacter : public ACharacter
@@ -37,6 +38,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USAttributeComponent* AttributeComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USActionComponent* ActionComp;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SProjectile")
 	UParticleSystem* CastSpellHandleVFX;
 
@@ -53,9 +57,15 @@ protected:
 
 	void PrimaryInteract();
 
+	void SprintStart();
+
+	void SprintStop();
+
 	UFUNCTION()
 	void OnCharacterHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 
+	virtual FVector GetPawnViewLocation() const override;
+	
 public:
 	
 	// Called every frame
@@ -74,5 +84,8 @@ public:
 	USAttributeComponent* GetAttributeComponent() const;
 
 	void SpawnCastSpellHandVFX();
+
+	UFUNCTION(Exec)
+	void HealSelf(float Amount = 100.f);
 
 };

@@ -1,5 +1,11 @@
 #include "SAttributeComponent.h"
 
+#include "SGameModeBase.h"
+#include "SPlayerState.h"
+#include "AI/SAICharacter.h"
+
+static TAutoConsoleVariable<float> CVarDamageMultiplier(TEXT("su.DamageMultiplier"), 1.f, TEXT("Global Damage Modifier for Attribute Component."), ECVF_Cheat);
+
 // Sets default values for this component's properties
 USAttributeComponent::USAttributeComponent()
 {
@@ -33,6 +39,18 @@ bool USAttributeComponent::IsActorAlive(AActor* Actor)
 
 bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta)
 {
+	if (!GetOwner()->CanBeDamaged() && Delta < 0.f)
+	{
+		return false;
+	}
+
+	if (Delta < 0.f)
+	{
+		const float DamageMultiplier = CVarDamageMultiplier.GetValueOnGameThread();
+
+		Delta *= DamageMultiplier;
+	}
+	
 	const float CurrentHealth = Health;
 	
 	Health = FMath::Clamp(Health + Delta, 0.f, MaxHealth);
@@ -41,6 +59,27 @@ bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delt
 	
 	OnHealthChanged.Broadcast(InstigatorActor, this, Health, Delta);
 
+	// Died
+	if (CurrentDelta < 0.f && Health == 0.f)
+	{
+		ASGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ASGameModeBase>();
+		if (GameMode)
+		{
+			GameMode->OnActorKilled(GetOwner(), InstigatorActor);
+		}
+
+		APawn* InstigatorPawn = Cast<APawn>(InstigatorActor);
+		if (InstigatorPawn)
+		{
+			ASAICharacter* AIVictim = Cast<ASAICharacter>(GetOwner());
+			ASPlayerState* InstigatorPLayerState = Cast<ASPlayerState>(InstigatorPawn->GetPlayerState());
+			if (AIVictim && InstigatorPLayerState)
+			{
+				InstigatorPLayerState->ApplyCoinsChange(AIVictim, CoinsOnDeathAmount);
+			}
+		}
+	}
+	
 	return CurrentDelta != 0.f;
 }
 
@@ -60,4 +99,9 @@ bool USAttributeComponent::FullHeal()
 bool USAttributeComponent::IsAlive() const
 {
 	return Health > 0.f;
+}
+
+bool USAttributeComponent::Kill(AActor* InstigatorActor)
+{
+	return ApplyHealthChange(InstigatorActor, -GetMaxHealth());
 }

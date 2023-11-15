@@ -1,5 +1,6 @@
 #include "SPowerup.h"
 
+#include "SPlayerState.h"
 #include "Components/SphereComponent.h"
 
 // Sets default values
@@ -11,6 +12,10 @@ ASPowerup::ASPowerup()
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	SphereComp->SetCollisionProfileName(TEXT("Powerup"));
 	RootComponent = SphereComp;
+
+	PowerupMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PowerupMesh"));
+	PowerupMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	PowerupMesh->SetupAttachment(RootComponent);
 }
 
 void ASPowerup::ShowPowerup()
@@ -32,7 +37,61 @@ void ASPowerup::SetPowerupState(bool bActive)
 	RootComponent->SetVisibility(bActive, true);
 }
 
+bool ASPowerup::CanInteractPowerup(APawn* InstigatorPawn)
+{
+	if (!InstigatorPawn)
+	{
+		return false;
+	}
+
+	if (!CanTakePowerup(InstigatorPawn))
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void ASPowerup::Interact_Implementation(APawn* InstigatorPawn)
 {
 	
+}
+
+bool ASPowerup::CanTakePowerup(APawn* InstigatorPawn)
+{
+	if (CreditsCostAmount >= 0)
+	{
+		return true;
+	}
+	
+	if (!InstigatorPawn)
+	{
+		return false;
+	}
+	
+	// Apply credits
+	ASPlayerState* PlayerState = Cast<ASPlayerState>(InstigatorPawn->GetPlayerState());
+	if (!PlayerState)
+	{
+		return false;
+	}
+
+	return FMath::Abs(CreditsCostAmount) <= PlayerState->GetNumCredits();
+}
+
+void ASPowerup::ApplyCoinsCost(APawn* InstigatorPawn)
+{
+	if (!InstigatorPawn)
+	{
+		return;
+	}
+	
+	// Apply credits
+	ASPlayerState* PlayerState = Cast<ASPlayerState>(InstigatorPawn->GetPlayerState());
+	if (!PlayerState)
+	{
+		return;
+	}
+
+	PlayerState->ApplyCoinsChange(this, CreditsCostAmount);
 }

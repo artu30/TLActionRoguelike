@@ -1,22 +1,15 @@
 #include "SPowerupHealthPotion.h"
 
 #include "SAttributeComponent.h"
-#include "Components/StaticMeshComponent.h"
-
-ASPowerupHealthPotion::ASPowerupHealthPotion()
-{
-	HealthPotionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HealthPotionMesh"));
-	HealthPotionMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	HealthPotionMesh->SetupAttachment(RootComponent);
-}
+#include "SPlayerState.h"
 
 void ASPowerupHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 {
-	if (!InstigatorPawn)
+	if (!CanInteractPowerup(InstigatorPawn))
 	{
 		return;
 	}
-
+	
 	USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(InstigatorPawn->GetComponentByClass(USAttributeComponent::StaticClass()));
 	if (!AttributeComp)
 	{
@@ -27,11 +20,20 @@ void ASPowerupHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 	{
 		return;
 	}
-
+	
 	if (!AttributeComp->ApplyHealthChange(this, HealthAmount))
 	{
 		return;
 	}
+
+	// Apply credits
+	ASPlayerState* PlayerState = Cast<ASPlayerState>(InstigatorPawn->GetPlayerState());
+	if (!PlayerState)
+	{
+		return;
+	}
+
+	ApplyCoinsCost(InstigatorPawn);
 
 	HidePoweup();
 }

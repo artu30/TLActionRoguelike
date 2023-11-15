@@ -16,17 +16,11 @@ class TLACTIONROGUELIKE_API ASPowerupHealthPotion : public ASPowerup
 
 public:
 	
-	// Sets default values for this actor's properties
-	ASPowerupHealthPotion();
-	
 	void Interact_Implementation(APawn* InstigatorPawn);
 
 protected:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UStaticMeshComponent* HealthPotionMesh;
-
 	UPROPERTY(EditAnywhere, Category = "PowerupHealthPotion")
 	float HealthAmount = 50.f;
-	
+
 };

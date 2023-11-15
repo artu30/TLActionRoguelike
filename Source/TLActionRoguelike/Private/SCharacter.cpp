@@ -1,5 +1,6 @@
 #include "SCharacter.h"
 
+#include "SActionComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -7,6 +8,7 @@
 #include "SInteractionComponent.h"
 #include "SAttackComponent.h"
 #include "SAttributeComponent.h"
+#include "SActionComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -27,6 +29,8 @@ ASCharacter::ASCharacter()
 	AttackComp = CreateDefaultSubobject<USAttackComponent>(TEXT("AttackComp"));
 
 	AttributeComp = CreateDefaultSubobject<USAttributeComponent>(TEXT("AttributeComp"));
+
+	ActionComp = CreateDefaultSubobject<USActionComponent>(TEXT("ActionComp"));
 	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	
@@ -104,6 +108,26 @@ void ASCharacter::PrimaryInteract()
 	InteractionComp->PrimaryInteract();
 }
 
+void ASCharacter::SprintStart()
+{
+	if (!ActionComp)
+	{
+		return;
+	}
+	
+	ActionComp->StartActionByName(this, "Sprint");
+}
+
+void ASCharacter::SprintStop()
+{
+	if (!ActionComp)
+	{
+		return;
+	}
+	
+	ActionComp->StopActionByName(this, "Sprint");
+}
+
 void ASCharacter::OnCharacterHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
 {
 	if (NewHealth <= 0.f && Delta < 0.f)
@@ -115,6 +139,11 @@ void ASCharacter::OnCharacterHealthChanged(AActor* InstigatorActor, USAttributeC
 	{
 		GetMesh()->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->TimeSeconds);
 	}
+}
+
+FVector ASCharacter::GetPawnViewLocation() const
+{
+	return CameraComp->GetComponentLocation();
 }
 
 // Called every frame
@@ -157,6 +186,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ASCharacter::Jump);
 
 	PlayerInputComponent->BindAction(TEXT("PrimaryInteract"), IE_Pressed, this, &ASCharacter::PrimaryInteract);
+
+	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Pressed, this, &ASCharacter::SprintStart);
+	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Released, this, &ASCharacter::SprintStop);
 }
 
 FVector ASCharacter::GetAttackStartLocation() const
@@ -211,4 +243,14 @@ void ASCharacter::SpawnCastSpellHandVFX()
 	FRotator VFXRotation = GetMesh()->GetSocketRotation(TEXT("Muzzle_01"));
 	
 	UGameplayStatics::SpawnEmitterAttached(CastSpellHandleVFX, GetMesh(), "Muzzle_01", VFXLocation, VFXRotation, FVector(1), EAttachLocation::KeepWorldPosition);
+}
+
+void ASCharacter::HealSelf(float Amount /* = 100 */)
+{
+	if (!AttributeComp)
+	{
+		return;
+	}
+
+	AttributeComp->ApplyHealthChange(this, Amount);
 }
