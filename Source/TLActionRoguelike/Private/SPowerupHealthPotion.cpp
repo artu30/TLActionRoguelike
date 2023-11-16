@@ -2,6 +2,7 @@
 
 #include "SAttributeComponent.h"
 #include "SPlayerState.h"
+#include "GameFramework/Pawn.h"
 
 void ASPowerupHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 {

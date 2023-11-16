@@ -1,8 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "SProjectileBase.h"
 #include "SMagicProjectile.generated.h"
+
+class USActionEffect;
 
 UCLASS()
 class TLACTIONROGUELIKE_API ASMagicProjectile : public ASProjectileBase
@@ -16,6 +19,15 @@ public:
 	
 protected:
 
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float HitDamage = -20.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	FGameplayTag ParryTag;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	TSubclassOf<USActionEffect> BurningActionClass;
+	
 	virtual void PostInitializeComponents() override;
 	
 	UFUNCTION()

@@ -1,8 +1,11 @@
 #include "SProjectileBase.h"
 
 #include "SAttributeComponent.h"
+#include "TimerManager.h"
+#include "Camera/CameraShakeBase.h"
 #include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
+#include "Engine/World.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"

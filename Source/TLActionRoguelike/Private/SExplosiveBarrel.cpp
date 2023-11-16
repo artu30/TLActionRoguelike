@@ -1,6 +1,8 @@
 #include "SExplosiveBarrel.h"
 
 #include "SAttributeComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/World.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 
 // Sets default values

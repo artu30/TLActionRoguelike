@@ -3,6 +3,7 @@
 #include "SGameModeBase.h"
 #include "SPlayerState.h"
 #include "AI/SAICharacter.h"
+#include "Engine/World.h"
 
 static TAutoConsoleVariable<float> CVarDamageMultiplier(TEXT("su.DamageMultiplier"), 1.f, TEXT("Global Damage Modifier for Attribute Component."), ECVF_Cheat);
 

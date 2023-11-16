@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/HitResult.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "SGameplayFunctionLibrary.generated.h"
 

@@ -9,6 +9,7 @@ class USAttributeComponent;
 class UUserWidget;
 class USWorldUserWidget;
 class USDamagePopupUserWidget;
+class USActionComponent;
 
 UCLASS()
 class TLACTIONROGUELIKE_API ASAICharacter : public ACharacter
@@ -26,6 +27,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USAttributeComponent* AttributeComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USActionComponent* ActionComp;
 
 	UPROPERTY(VisibleAnywhere, Category = "Effects")
 	FName TimeToHitParamName = "TimeToHit";

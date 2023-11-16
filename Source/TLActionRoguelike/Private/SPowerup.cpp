@@ -1,7 +1,10 @@
 #include "SPowerup.h"
 
 #include "SPlayerState.h"
+#include "TimerManager.h"
 #include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "GameFramework/Pawn.h"
 
 // Sets default values
 ASPowerup::ASPowerup()

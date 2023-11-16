@@ -32,9 +32,6 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	USInteractionComponent* InteractionComp;
 
-	UPROPERTY(VisibleAnywhere)
-	USAttackComponent* AttackComp;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USAttributeComponent* AttributeComp;
 
@@ -74,16 +71,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	FVector GetAttackStartLocation() const;
-
-	FVector GetAttackEndLocation() const;
-
-	FRotator GetAttackStartRotation() const;
-
 	UFUNCTION(BlueprintCallable)
 	USAttributeComponent* GetAttributeComponent() const;
-
-	void SpawnCastSpellHandVFX();
 
 	UFUNCTION(Exec)
 	void HealSelf(float Amount = 100.f);

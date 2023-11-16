@@ -2,6 +2,8 @@
 
 #include "AIController.h"
 #include "BrainComponent.h"
+#include "DrawDebugHelpers.h"
+#include "SActionComponent.h"
 #include "SAttributeComponent.h"
 #include "SDamagePopupUserWidget.h"
 #include "SWorldUserWidget.h"
@@ -9,6 +11,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/PawnSensingComponent.h"
 
@@ -21,6 +24,8 @@ ASAICharacter::ASAICharacter()
 	PawnSensingComp = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
 
 	AttributeComp = CreateDefaultSubobject<USAttributeComponent>(TEXT("AttributeComp"));
+
+	ActionComp = CreateDefaultSubobject<USActionComponent>(TEXT("ActionComp"));
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
@@ -56,7 +61,7 @@ void ASAICharacter::OnAICharacterHealthChanged(AActor* InstigatorActor, USAttrib
 		SetTargetActor(InstigatorActor);
 	}
 
-	if (ActiveHealthBar == nullptr)
+	if (ActiveHealthBar == nullptr && ensure(HealthBarWidgetClass))
 	{
 		ActiveHealthBar = CreateWidget<USWorldUserWidget>(GetWorld(), HealthBarWidgetClass);
 		if (ActiveHealthBar)
@@ -66,13 +71,22 @@ void ASAICharacter::OnAICharacterHealthChanged(AActor* InstigatorActor, USAttrib
 		}
 	}
 
-	if (DamagePopUp == nullptr)
+	if (!DamagePopUp && ensure(DamagePopUpWidgetClass))
 	{
 		DamagePopUp = CreateWidget<USDamagePopupUserWidget>(GetWorld(), DamagePopUpWidgetClass);
-		if (DamagePopUp)
+	}
+
+	if (DamagePopUp)
+	{
+		if (!DamagePopUp->AttachedActor)
 		{
 			DamagePopUp->AttachedActor = this;
-			DamagePopUp->TextToShow = FMath::Abs(Delta);
+		}
+
+		DamagePopUp->TextToShow = FMath::Abs(Delta);
+		
+		if (!DamagePopUp->IsInViewport())
+		{
 			DamagePopUp->AddToViewport();
 		}
 	}

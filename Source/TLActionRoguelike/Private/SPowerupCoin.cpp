@@ -1,7 +1,5 @@
 #include "SPowerupCoin.h"
 
-#include "SPlayerState.h"
-
 void ASPowerupCoin::Interact_Implementation(APawn* InstigatorPawn)
 {
 	if (!CanInteractPowerup(InstigatorPawn))

@@ -1,14 +1,15 @@
 #include "SCharacter.h"
 
+#include "DrawDebugHelpers.h"
 #include "SActionComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SInteractionComponent.h"
-#include "SAttackComponent.h"
 #include "SAttributeComponent.h"
-#include "SActionComponent.h"
+#include "Components/InputComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -25,8 +26,6 @@ ASCharacter::ASCharacter()
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	InteractionComp = CreateDefaultSubobject<USInteractionComponent>(TEXT("InteractionComp"));
-
-	AttackComp = CreateDefaultSubobject<USAttackComponent>(TEXT("AttackComp"));
 
 	AttributeComp = CreateDefaultSubobject<USAttributeComponent>(TEXT("AttributeComp"));
 
@@ -67,35 +66,32 @@ void ASCharacter::MoveRight(float Value)
 
 void ASCharacter::PrimaryAttack()
 {
-	if (!AttackComp)
+	if (!ActionComp)
 	{
 		return;
 	}
-
-	PlayAnimMontage(AttackComp->GetMagicProjectileAttackAnim());
-	AttackComp->PrimaryAttack(GetWorld());
+	
+	ActionComp->StartActionByName(this, "PrimaryAttack");
 }
 
 void ASCharacter::BlackholeAttack()
 {
-	if (!AttackComp)
+	if (!ActionComp)
 	{
 		return;
 	}
-
-	PlayAnimMontage(AttackComp->GetBlackholeProjectileAttackAnim());
-	AttackComp->BlackholeAttack(GetWorld());
+	
+	ActionComp->StartActionByName(this, "BlackholeAttack");
 }
 
 void ASCharacter::TeleportAttack()
 {
-	if (!AttackComp)
+	if (!ActionComp)
 	{
 		return;
 	}
-
-	PlayAnimMontage(AttackComp->GetTeleportProjectileAttackAnim());
-	AttackComp->TeleportAttack(GetWorld());
+	
+	ActionComp->StartActionByName(this, "TeleportAttack");
 }
 
 void ASCharacter::PrimaryInteract()
@@ -191,58 +187,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Released, this, &ASCharacter::SprintStop);
 }
 
-FVector ASCharacter::GetAttackStartLocation() const
-{
-	return GetMesh()->GetSocketLocation(TEXT("Muzzle_01"));
-}
-
-FVector ASCharacter::GetAttackEndLocation() const
-{
-	FVector CameraLocation = CameraComp->GetComponentLocation();
-	FVector EndCameraRayLocation = CameraLocation + (GetControlRotation().Vector() * 5000.f);
-
-	FCollisionShape Shape;
-	Shape.SetSphere(20.f);
-
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	
-	FHitResult Hit;
-	FCollisionObjectQueryParams ObjectQueryParams;
-	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
-	ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
-
-	FVector ProjectileEndPosition = EndCameraRayLocation;
-	if (GetWorld()->SweepSingleByObjectType(Hit, CameraLocation, EndCameraRayLocation, FQuat::Identity, ObjectQueryParams, Shape, Params))
-	{
-		ProjectileEndPosition = Hit.ImpactPoint;
-	}
-
-	return ProjectileEndPosition;
-}
-
-FRotator ASCharacter::GetAttackStartRotation() const
-{
-	return UKismetMathLibrary::FindLookAtRotation(GetAttackStartLocation(), GetAttackEndLocation());
-}
-
 USAttributeComponent* ASCharacter::GetAttributeComponent() const
 {
 	return AttributeComp;
-}
-
-void ASCharacter::SpawnCastSpellHandVFX()
-{
-	if (!CastSpellHandleVFX)
-	{
-		return;
-	}
-
-	FVector VFXLocation = GetAttackStartLocation();
-	FRotator VFXRotation = GetMesh()->GetSocketRotation(TEXT("Muzzle_01"));
-	
-	UGameplayStatics::SpawnEmitterAttached(CastSpellHandleVFX, GetMesh(), "Muzzle_01", VFXLocation, VFXRotation, FVector(1), EAttachLocation::KeepWorldPosition);
 }
 
 void ASCharacter::HealSelf(float Amount /* = 100 */)

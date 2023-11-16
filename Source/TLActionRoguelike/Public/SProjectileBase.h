@@ -44,9 +44,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "SProjectile")
 	float TimeToDetonation = 2.f;
 
-	UPROPERTY(EditAnywhere, Category = "SProjectile")
-	float HitDamage = -20.f;
-
 	UPROPERTY(EditDefaultsOnly, Category = "SProjectile")
 	TSubclassOf<UCameraShakeBase> CameraShake;
 

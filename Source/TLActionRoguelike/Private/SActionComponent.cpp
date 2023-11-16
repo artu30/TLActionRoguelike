@@ -1,6 +1,7 @@
 #include "SActionComponent.h"
 
 #include "SAction.h"
+#include "Engine/Engine.h"
 
 // Sets default values for this component's properties
 USActionComponent::USActionComponent()
@@ -18,8 +19,10 @@ void USActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	for (TSubclassOf<USAction> ActionClass : DefaultActions)
+	{
+		AddAction(GetOwner(), ActionClass);
+	}
 }
 
 
@@ -28,10 +31,11 @@ void USActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	const FString DebugMsg = GetNameSafe(GetOwner()) + " : " + ActiveGameplayTags.ToStringSimple();
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::White, DebugMsg);
 }
 
-void USActionComponent::AddAction(TSubclassOf<USAction> ActionClass)
+void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> ActionClass)
 {
 	if (!ensure(ActionClass))
 	{
@@ -42,7 +46,22 @@ void USActionComponent::AddAction(TSubclassOf<USAction> ActionClass)
 	if (ensure(NewAction))
 	{
 		Actions.Add(NewAction);
+
+		if (NewAction->bAutoStart && ensure(NewAction->CanStart(Instigator)))
+		{
+			NewAction->StartAction(Instigator);
+		}
 	}
+}
+
+void USActionComponent::RemoveAction(USAction* Action)
+{
+	if (!ensure(Action && !Action->IsRunning()))
+	{
+		return ;
+	}
+	
+	Actions.Remove(Action);
 }
 
 bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
@@ -51,6 +70,13 @@ bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 	{
 		if (Action && Action->ActionName == ActionName)
 		{
+			if (!Action->CanStart(Instigator))
+			{
+				FString FailedMsg = FString::Printf(TEXT("Failed to run: %s"), *ActionName.ToString());
+				GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FailedMsg);
+				continue;
+			}
+			
 			Action->StartAction(Instigator);
 			return true;
 		}
@@ -65,8 +91,14 @@ bool USActionComponent::StopActionByName(AActor* Instigator, FName ActionName)
 	{
 		if (Action && Action->ActionName == ActionName)
 		{
+			if (!Action->IsRunning())
+			{
+				continue;
+			}
+			
 			Action->StopAction(Instigator);
 			return true;
+			
 		}
 	}
 

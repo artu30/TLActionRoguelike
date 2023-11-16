@@ -1,8 +1,10 @@
 #include "SGameModeBase.h"
 
+#include "DrawDebugHelpers.h"
 #include "EngineUtils.h"
 #include "SAttributeComponent.h"
 #include "SCharacter.h"
+#include "TimerManager.h"
 #include "AI/SAICharacter.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 

@@ -3,6 +3,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "SCharacter.h"
+#include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
 
 ASTeleportProjectile::ASTeleportProjectile()
