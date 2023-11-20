@@ -48,4 +48,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	bool StopActionByName(AActor* Instigator, FName ActionName);
 
+	USAction* GetAction(TSubclassOf<USAction> ActionClass) const;
+
 };

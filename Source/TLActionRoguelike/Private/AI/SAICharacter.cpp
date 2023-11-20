@@ -42,11 +42,35 @@ void ASAICharacter::PostInitializeComponents()
 	AttributeComp->OnHealthChanged.AddDynamic(this, &ASAICharacter::OnAICharacterHealthChanged);
 }
 
+AActor* ASAICharacter::GetTargetActor() const
+{
+	AAIController* AIController = Cast<AAIController>(GetController());
+	if (!AIController)
+	{
+		return nullptr;
+	}
+
+	return Cast<AActor>(AIController->GetBlackboardComponent()->GetValueAsObject(TargetActorKeyName));
+}
+
 void ASAICharacter::OnPawnSeen(APawn* Pawn)
 {
+	if (GetTargetActor() == Pawn)
+	{
+		return;
+	}
+	
 	SetTargetActor(Pawn);
 
-	DrawDebugString(GetWorld(), GetActorLocation(), "PLAYER SPOTTED", nullptr, FColor::White, 4.f, true);
+	USWorldUserWidget* SpottedWidget = CreateWidget<USWorldUserWidget>(GetWorld(), SpottedWidgetClass);
+	if (SpottedWidget)
+	{
+		SpottedWidget->AttachedActor = this;
+
+		// Index of 10 (or anything higher than default of 0) places this on top of any other widget.
+		// May end up behind the minion health bar otherwise
+		SpottedWidget->AddToViewport(10);
+	}
 }
 
 void ASAICharacter::OnAICharacterHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)

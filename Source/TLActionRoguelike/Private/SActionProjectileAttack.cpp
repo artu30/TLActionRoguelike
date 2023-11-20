@@ -1,5 +1,6 @@
 #include "SActionProjectileAttack.h"
 
+#include "SAttributeComponent.h"
 #include "TimerManager.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
@@ -30,6 +31,27 @@ void USActionProjectileAttack::StartAction_Implementation(AActor* Instigator)
 	Delegate.BindUFunction(this, "AttackDelayElapsed", CharacterInstigator);
 
 	GetWorld()->GetTimerManager().SetTimer(TimerHandleAttackDelay, Delegate, AttackAnimDelay, false);
+}
+
+bool USActionProjectileAttack::CanStart_Implementation(AActor* Instigator)
+{
+	if (!Super::CanStart_Implementation(Instigator))
+	{
+		return false;
+	}
+	
+	USAttributeComponent* AttributeComp = USAttributeComponent::GetAttributes(Instigator);
+	if (!ensure(AttributeComp))
+	{
+		return false;
+	}
+
+	if (!AttributeComp->HasEnoughRage(RageCost))
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void USActionProjectileAttack::AttackDelayElapsed(ACharacter* InstigatorCharacter)

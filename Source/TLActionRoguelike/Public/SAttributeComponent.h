@@ -4,7 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "SAttributeComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, InstigatorActor, USAttributeComponent*, OwningComp, float, NewHealth, float, Delta);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnAttributeChanged, AActor*, InstigatorActor, USAttributeComponent*, OwningComp, float, NewValue, float, Delta);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TLACTIONROGUELIKE_API USAttributeComponent : public UActorComponent
@@ -36,13 +36,28 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
 	int32 CoinsOnDeathAmount = 10;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	float Rage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	float MaxRage = 100.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	float RageByDamageMultiplier = 1.f;
+
 public:
 
 	UPROPERTY(BlueprintAssignable)
-	FOnHealthChanged OnHealthChanged;
+	FOnAttributeChanged OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnAttributeChanged OnRageChanged;
 	
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	bool ApplyHealthChange(AActor* InstigatorActor, float Delta);
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	bool ApplyRageChange(AActor* InstigatorActor, float Delta);
 
 	bool FullHeal();
 
@@ -54,6 +69,8 @@ public:
 	bool IsFullHealth() const { return Health >= MaxHealth; }
 
 	bool IsLowHealth() const { return Health <= LowHealthAmount; }
+
+	bool HasEnoughRage(float RageCost) const { return Rage >= RageCost; }
 
 	UFUNCTION(BlueprintCallable)
 	bool Kill(AActor* InstigatorActor);

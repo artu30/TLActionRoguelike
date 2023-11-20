@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BehaviorTree/BehaviorTreeTypes.h"
 #include "GameFramework/Character.h"
 #include "SAICharacter.generated.h"
 
@@ -19,6 +20,8 @@ class TLACTIONROGUELIKE_API ASAICharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	ASAICharacter();
+
+	AActor* GetTargetActor() const;
 
 protected:
 
@@ -39,6 +42,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> DamagePopUpWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> SpottedWidgetClass;
+
+	UPROPERTY(EditAnywhere, Category = "AI")
+	FName TargetActorKeyName = "TargetActor";
 
 	UPROPERTY()
 	USWorldUserWidget* ActiveHealthBar;

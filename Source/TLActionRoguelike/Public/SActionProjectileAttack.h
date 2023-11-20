@@ -37,9 +37,14 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	UParticleSystem* CastingEffect;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
+	float RageCost = 0.f;
+
 public:
 
 	virtual void StartAction_Implementation(AActor* Instigator) override;
+
+	virtual bool CanStart_Implementation(AActor* Instigator) override;
 
 protected:
 
