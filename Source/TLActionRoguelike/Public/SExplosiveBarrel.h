@@ -22,7 +22,7 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* ExplosiveBarrelMesh;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	URadialForceComponent* RadialForceComp;
 
 	UPROPERTY(EditAnywhere, Category = "ExplosiveBarrel")

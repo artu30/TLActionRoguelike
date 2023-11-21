@@ -28,6 +28,9 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	UFUNCTION(Server, Reliable)
+	void ServerStartAction(AActor* Instigator, FName ActionName);
+
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tags")

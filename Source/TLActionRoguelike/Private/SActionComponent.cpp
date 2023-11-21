@@ -10,7 +10,7 @@ USActionComponent::USActionComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+	SetIsReplicatedByDefault(true);
 }
 
 
@@ -25,6 +25,10 @@ void USActionComponent::BeginPlay()
 	}
 }
 
+void USActionComponent::ServerStartAction_Implementation(AActor* Instigator, FName ActionName)
+{
+	StartActionByName(Instigator, ActionName);
+}
 
 // Called every frame
 void USActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -75,6 +79,12 @@ bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 				FString FailedMsg = FString::Printf(TEXT("Failed to run: %s"), *ActionName.ToString());
 				GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FailedMsg);
 				continue;
+			}
+
+			// Is client
+			if (!GetOwner()->HasAuthority())
+			{
+				ServerStartAction(Instigator, ActionName);
 			}
 			
 			Action->StartAction(Instigator);

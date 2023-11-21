@@ -32,7 +32,7 @@ void USActionEffectThorns::StopAction_Implementation(AActor* Instigator)
 
 void USActionEffectThorns::OnOwnerHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
 {
-	AActor* OwningActor = GetOwningComponent()->GetOwner();
+	const AActor* OwningActor = GetOwningComponent()->GetOwner();
 	
 	if (Delta >= 0.f || InstigatorActor == OwningActor)
 	{

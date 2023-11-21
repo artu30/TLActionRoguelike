@@ -19,6 +19,8 @@ ASPowerup::ASPowerup()
 	PowerupMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PowerupMesh"));
 	PowerupMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	PowerupMesh->SetupAttachment(RootComponent);
+
+	bReplicates = true;
 }
 
 void ASPowerup::ShowPowerup()

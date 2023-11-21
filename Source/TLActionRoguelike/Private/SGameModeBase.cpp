@@ -108,8 +108,6 @@ void ASGameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryIn
 	}
 
 	GetWorld()->SpawnActor<AActor>(MinionClass, Locations[0], FRotator::ZeroRotator);
-
-	DrawDebugSphere(GetWorld(), Locations[0], 50.f, 20, FColor::Blue, false, 60.f);
 }
 
 void ASGameModeBase::OnSpawnPowerupsQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus)
@@ -143,8 +141,6 @@ void ASGameModeBase::OnSpawnPowerupsQueryCompleted(UEnvQueryInstanceBlueprintWra
 			Locations.RemoveAt(RandomIndex);
 			
 			GetWorld()->SpawnActor<AActor>(PowerUp.PowerupClass, LocationToSpawn, FRotator::ZeroRotator);
-
-			DrawDebugSphere(GetWorld(), LocationToSpawn, 50.f, 20, FColor::Blue, false, 60.f);
 		}
 
 		if (!HasEnoughLocations)

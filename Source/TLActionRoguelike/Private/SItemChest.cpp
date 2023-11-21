@@ -1,6 +1,7 @@
 #include "SItemChest.h"
 
 #include "Components/StaticMeshComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ASItemChest::ASItemChest()
@@ -13,23 +14,25 @@ ASItemChest::ASItemChest()
 
 	LidMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LidMesh"));
 	LidMesh->SetupAttachment(BaseMesh);
+
+	bReplicates = true;
 }
 
-// Called when the game starts or when spawned
-void ASItemChest::BeginPlay()
+void ASItemChest::OnRep_LidOpened()
 {
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ASItemChest::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
+	const float CurrentPitch = bLidOpened ? TargetPitch : 0.f;
+	LidMesh->SetRelativeRotation(FRotator(CurrentPitch, 0, 0));
 }
 
 void ASItemChest::Interact_Implementation(APawn* InstigatorPawn)
 {
-	LidMesh->SetRelativeRotation(FRotator(TargetPitch, 0.f, 0.f));
+	bLidOpened = !bLidOpened;
+	OnRep_LidOpened();
+}
+
+void ASItemChest::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASItemChest, bLidOpened);
 }

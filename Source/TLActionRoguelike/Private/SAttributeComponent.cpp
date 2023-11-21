@@ -4,6 +4,7 @@
 #include "SPlayerState.h"
 #include "AI/SAICharacter.h"
 #include "Engine/World.h"
+#include "Net/UnrealNetwork.h"
 
 static TAutoConsoleVariable<float> CVarDamageMultiplier(TEXT("su.DamageMultiplier"), 1.f, TEXT("Global Damage Modifier for Attribute Component."), ECVF_Cheat);
 
@@ -16,6 +17,8 @@ USAttributeComponent::USAttributeComponent()
 
 	Health = MaxHealth;
 	Rage = MaxRage;
+
+	SetIsReplicatedByDefault(true);
 }
 
 USAttributeComponent* USAttributeComponent::GetAttributes(AActor* FromActor)
@@ -39,6 +42,16 @@ bool USAttributeComponent::IsActorAlive(AActor* Actor)
 	return AttributeComp->IsAlive();
 }
 
+void USAttributeComponent::MulticastHealthChanged_Implementation(AActor* InstigatorActor, float NewHealth, float Delta)
+{
+	OnHealthChanged.Broadcast(InstigatorActor, this, NewHealth, Delta);
+}
+
+void USAttributeComponent::MulticastRageChanged_Implementation(AActor* InstigatorActor, float NewRage, float Delta)
+{
+	OnRageChanged.Broadcast(InstigatorActor, this, NewRage, Delta);
+}
+
 bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta)
 {
 	if (!GetOwner()->CanBeDamaged() && Delta < 0.f)
@@ -53,14 +66,18 @@ bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delt
 		Delta *= DamageMultiplier;
 	}
 	
-	const float CurrentHealth = Health;
+	const float OldHealth = Health;
 	
 	Health = FMath::Clamp(Health + Delta, 0.f, MaxHealth);
 
-	const float CurrentDelta = Health - CurrentHealth;
+	const float CurrentDelta = Health - OldHealth;
 	
-	OnHealthChanged.Broadcast(InstigatorActor, this, Health, Delta);
-
+	//OnHealthChanged.Broadcast(InstigatorActor, this, Health, CurrentDelta);
+	if (CurrentDelta != 0.f)
+	{
+		MulticastHealthChanged(InstigatorActor, Health, CurrentDelta);
+	}
+	
 	if (Delta < 0.f)
 	{
 		ApplyRageChange(InstigatorActor, -Delta * RageByDamageMultiplier);
@@ -92,13 +109,17 @@ bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delt
 
 bool USAttributeComponent::ApplyRageChange(AActor* InstigatorActor, float Delta)
 {
-	const float CurrentRage = Rage;
+	const float OldRage = Rage;
 	
 	Rage = FMath::Clamp(Rage + Delta, 0.f, MaxRage);
 
-	const float CurrentDelta = Rage - CurrentRage;
+	const float CurrentDelta = Rage - OldRage;
 
-	OnRageChanged.Broadcast(InstigatorActor, this, Rage, Delta);
+	//OnRageChanged.Broadcast(InstigatorActor, this, Rage, CurrentDelta);
+	if (CurrentDelta != 0.f)
+	{
+		MulticastRageChanged(InstigatorActor, Rage, CurrentDelta);
+	}
 	
 	return CurrentDelta != 0.f;
 }
@@ -124,4 +145,17 @@ bool USAttributeComponent::IsAlive() const
 bool USAttributeComponent::Kill(AActor* InstigatorActor)
 {
 	return ApplyHealthChange(InstigatorActor, -GetMaxHealth());
+}
+
+void USAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(USAttributeComponent, Health);
+	DOREPLIFETIME(USAttributeComponent, MaxHealth);
+
+	DOREPLIFETIME(USAttributeComponent, Rage);
+	DOREPLIFETIME(USAttributeComponent, MaxRage);
+
+	//DOREPLIFETIME_CONDITION(USAttributeComponent, MaxHealth, COND_OwnerOnly);
 }

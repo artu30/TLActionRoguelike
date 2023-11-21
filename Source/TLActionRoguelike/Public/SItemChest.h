@@ -27,14 +27,14 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	float TargetPitch = 110.f;
-	
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+
+	UPROPERTY(ReplicatedUsing = "OnRep_LidOpened", BlueprintReadOnly)
+	bool bLidOpened;
+
+	UFUNCTION()
+	void OnRep_LidOpened();
 
 public:
-	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	void Interact_Implementation(APawn* InstigatorPawn);
 	

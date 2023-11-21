@@ -23,15 +23,7 @@ USInteractionComponent::USInteractionComponent()
 
 void USInteractionComponent::PrimaryInteract()
 {
-	if (!FocusedActor)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, "No Focus Actor to interact.");
-		return;
-	}
-	
-	APawn* MyOwnerPawn = Cast<APawn>(GetOwner());
-	
-	ISGameplayInterface::Execute_Interact(FocusedActor, MyOwnerPawn);
+	ServerInteract(FocusedActor);
 }
 
 void USInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -39,7 +31,26 @@ void USInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	APawn* Pawn = Cast<APawn>(GetOwner());
+	if (!Pawn->IsLocallyControlled())
+	{
+		return;
+	}
+	
 	FindBestInteractable();
+}
+
+void USInteractionComponent::ServerInteract_Implementation(AActor* InFocus)
+{
+	if (!InFocus)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, "No Focus Actor to interact.");
+		return;
+	}
+	
+	APawn* MyOwnerPawn = Cast<APawn>(GetOwner());
+	
+	ISGameplayInterface::Execute_Interact(InFocus, MyOwnerPawn);
 }
 
 void USInteractionComponent::FindBestInteractable()
