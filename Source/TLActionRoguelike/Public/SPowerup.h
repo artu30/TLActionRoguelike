@@ -33,11 +33,17 @@ protected:
 
 	FTimerHandle TimerHandleShowPowerup;
 
+	UPROPERTY(ReplicatedUsing = "OnRep_IsActive")
+	bool bIsActive = true;
+	
 	void ShowPowerup();
 
 	void HidePoweup();
 
 	void SetPowerupState(bool bActive);
+
+	UFUNCTION()
+	void OnRep_IsActive();
 
 public:
 

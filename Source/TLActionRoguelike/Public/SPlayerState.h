@@ -16,11 +16,14 @@ class TLACTIONROGUELIKE_API ASPlayerState : public APlayerState
 
 protected:
 
-	UPROPERTY(EditDefaultsOnly, Category = "Credits")
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = "OnRep_Credits", Category = "Credits")
 	int32 NumCredits = 50;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Credits")
-	int32 MaxCredits = 100;
+	UFUNCTION()
+	void OnRep_Credits(int32 OldCredits);
+
+	//UFUNCTION(NetMulticast, Unreliable)
+	//void MulticastCreditsChanged(float NewCredits, float Delta);
 	
 public:
 
@@ -30,6 +33,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Credits")
 	void ApplyCoinsChange(AActor* InstigatorActor, int32 Delta);
 
+	UFUNCTION(BlueprintCallable, Category = "Credits")
 	int32 GetNumCredits() const { return NumCredits; }
 	
 };

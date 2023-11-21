@@ -62,15 +62,7 @@ void ASAICharacter::OnPawnSeen(APawn* Pawn)
 	
 	SetTargetActor(Pawn);
 
-	USWorldUserWidget* SpottedWidget = CreateWidget<USWorldUserWidget>(GetWorld(), SpottedWidgetClass);
-	if (SpottedWidget)
-	{
-		SpottedWidget->AttachedActor = this;
-
-		// Index of 10 (or anything higher than default of 0) places this on top of any other widget.
-		// May end up behind the minion health bar otherwise
-		SpottedWidget->AddToViewport(10);
-	}
+	MulticastPawnSeen();
 }
 
 void ASAICharacter::OnAICharacterHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
@@ -161,4 +153,17 @@ void ASAICharacter::SetTargetActor(AActor* NewTarget)
 	}
 
 	BlackboardComp->SetValueAsObject("TargetActor", NewTarget);
+}
+
+void ASAICharacter::MulticastPawnSeen_Implementation()
+{
+	USWorldUserWidget* SpottedWidget = CreateWidget<USWorldUserWidget>(GetWorld(), SpottedWidgetClass);
+	if (SpottedWidget)
+	{
+		SpottedWidget->AttachedActor = this;
+
+		// Index of 10 (or anything higher than default of 0) places this on top of any other widget.
+		// May end up behind the minion health bar otherwise
+		SpottedWidget->AddToViewport(10);
+	}
 }

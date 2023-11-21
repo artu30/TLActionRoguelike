@@ -64,5 +64,8 @@ protected:
 	void OnAICharacterHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 
 	void SetTargetActor(AActor* NewTarget);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPawnSeen();
 	
 };

@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/Pawn.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ASPowerup::ASPowerup()
@@ -37,9 +38,15 @@ void ASPowerup::HidePoweup()
 
 void ASPowerup::SetPowerupState(bool bActive)
 {
-	SetActorEnableCollision(bActive);
+	bIsActive = bActive;
+	OnRep_IsActive();
+}
 
-	RootComponent->SetVisibility(bActive, true);
+void ASPowerup::OnRep_IsActive()
+{
+	SetActorEnableCollision(bIsActive);
+
+	RootComponent->SetVisibility(bIsActive, true);
 }
 
 bool ASPowerup::CanInteractPowerup(APawn* InstigatorPawn)
@@ -99,4 +106,11 @@ void ASPowerup::ApplyCoinsCost(APawn* InstigatorPawn)
 	}
 
 	PlayerState->ApplyCoinsChange(this, CreditsCostAmount);
+}
+
+void ASPowerup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASPowerup, bIsActive);
 }
