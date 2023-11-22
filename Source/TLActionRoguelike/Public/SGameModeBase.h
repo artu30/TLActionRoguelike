@@ -9,6 +9,7 @@
 class UEnvQuery;
 class UEnvQueryInstanceBlueprintWrapper;
 class UCurveFloat;
+class USSaveGame;
 
 USTRUCT(BlueprintType)
 struct FSPowerupData
@@ -58,6 +59,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Powerups")
 	UEnvQuery* SpawnPowerupEQS;
 
+	UPROPERTY()
+	USSaveGame* CurrentSaveGame;
+
+	FString SlotName = "SaveGame01";
+
 	UFUNCTION()
 	void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
 
@@ -75,6 +81,8 @@ protected:
 public:
 
 	ASGameModeBase();
+
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	
 	virtual void StartPlay() override;
 
@@ -82,5 +90,12 @@ public:
 	void KillAllAI();
 
 	virtual void OnActorKilled(AActor* VictimActor, AActor* KillerActor);
+
+	void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+	
+	UFUNCTION(BlueprintCallable, Category = "SaveGame")
+	void WriteSaveGame();
+
+	void LoadSaveGame();
 	
 };

@@ -28,7 +28,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float TargetPitch = 110.f;
 
-	UPROPERTY(ReplicatedUsing = "OnRep_LidOpened", BlueprintReadOnly)
+	UPROPERTY(ReplicatedUsing = "OnRep_LidOpened", BlueprintReadOnly, SaveGame)
 	bool bLidOpened;
 
 	UFUNCTION()
@@ -37,5 +37,7 @@ protected:
 public:
 
 	void Interact_Implementation(APawn* InstigatorPawn);
+
+	void OnActorLoaded_Implementation();
 	
 };

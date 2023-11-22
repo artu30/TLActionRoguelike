@@ -8,6 +8,21 @@
 class UWorld;
 class USActionComponent;
 
+USTRUCT()
+struct FActionRepData
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY()
+	bool bIsRunning;
+
+	UPROPERTY()
+	AActor* Instigator;
+	
+};
+
 /**
  * 
  */
@@ -26,8 +41,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	FGameplayTagContainer BlockedTags;
 
-	bool bIsRunning = false;
+	UPROPERTY(ReplicatedUsing = "OnRep_RepData")
+	FActionRepData RepData;
 
+	UFUNCTION()
+	void OnRep_RepData();
+	
 public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Action")
@@ -48,7 +67,9 @@ public:
 	UWorld* GetWorld() const override;
 
 	UFUNCTION(BlueprintCallable, Category = "Action")
-	bool IsRunning() const { return bIsRunning; }
+	bool IsRunning() const { return RepData.bIsRunning; }
+
+	virtual bool IsSupportedForNetworking() const override { return true; }
 
 protected:
 

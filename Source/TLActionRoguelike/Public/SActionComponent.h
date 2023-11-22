@@ -19,7 +19,7 @@ public:
 
 protected:
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<USAction*> Actions;
 
 	UPROPERTY(EditAnywhere, Category = "Actions")
@@ -30,6 +30,9 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerStartAction(AActor* Instigator, FName ActionName);
+
+	UFUNCTION(Server, Reliable)
+	void ServerStopAction(AActor* Instigator, FName ActionName);
 
 public:
 
@@ -52,5 +55,7 @@ public:
 	bool StopActionByName(AActor* Instigator, FName ActionName);
 
 	USAction* GetAction(TSubclassOf<USAction> ActionClass) const;
+
+	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 
 };

@@ -67,41 +67,45 @@ bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delt
 	}
 	
 	const float OldHealth = Health;
-	
-	Health = FMath::Clamp(Health + Delta, 0.f, MaxHealth);
+	const float NewHealth = FMath::Clamp(Health + Delta, 0.f, MaxHealth);
 
-	const float CurrentDelta = Health - OldHealth;
+	const float CurrentDelta = NewHealth - OldHealth;
 	
-	//OnHealthChanged.Broadcast(InstigatorActor, this, Health, CurrentDelta);
-	if (CurrentDelta != 0.f)
+	// Is Server?
+	if (GetOwner()->HasAuthority())
 	{
-		MulticastHealthChanged(InstigatorActor, Health, CurrentDelta);
+		Health = NewHealth;
+
+		if (CurrentDelta != 0.f)
+		{
+			MulticastHealthChanged(InstigatorActor, Health, CurrentDelta);
+		}
+
+		// Died
+		if (CurrentDelta < 0.f && Health == 0.f)
+		{
+			ASGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ASGameModeBase>();
+			if (GameMode)
+			{
+				GameMode->OnActorKilled(GetOwner(), InstigatorActor);
+			}
+
+			APawn* InstigatorPawn = Cast<APawn>(InstigatorActor);
+			if (InstigatorPawn)
+			{
+				ASAICharacter* AIVictim = Cast<ASAICharacter>(GetOwner());
+				ASPlayerState* InstigatorPLayerState = Cast<ASPlayerState>(InstigatorPawn->GetPlayerState());
+				if (AIVictim && InstigatorPLayerState)
+				{
+					InstigatorPLayerState->ApplyCoinsChange(AIVictim, CoinsOnDeathAmount);
+				}
+			}
+		}
 	}
 	
 	if (Delta < 0.f)
 	{
 		ApplyRageChange(InstigatorActor, -Delta * RageByDamageMultiplier);
-	}
-	
-	// Died
-	if (CurrentDelta < 0.f && Health == 0.f)
-	{
-		ASGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ASGameModeBase>();
-		if (GameMode)
-		{
-			GameMode->OnActorKilled(GetOwner(), InstigatorActor);
-		}
-
-		APawn* InstigatorPawn = Cast<APawn>(InstigatorActor);
-		if (InstigatorPawn)
-		{
-			ASAICharacter* AIVictim = Cast<ASAICharacter>(GetOwner());
-			ASPlayerState* InstigatorPLayerState = Cast<ASPlayerState>(InstigatorPawn->GetPlayerState());
-			if (AIVictim && InstigatorPLayerState)
-			{
-				InstigatorPLayerState->ApplyCoinsChange(AIVictim, CoinsOnDeathAmount);
-			}
-		}
 	}
 	
 	return CurrentDelta != 0.f;
@@ -110,15 +114,19 @@ bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delt
 bool USAttributeComponent::ApplyRageChange(AActor* InstigatorActor, float Delta)
 {
 	const float OldRage = Rage;
+	const float NewRage = FMath::Clamp(Rage + Delta, 0.f, MaxRage);
 	
-	Rage = FMath::Clamp(Rage + Delta, 0.f, MaxRage);
-
-	const float CurrentDelta = Rage - OldRage;
-
-	//OnRageChanged.Broadcast(InstigatorActor, this, Rage, CurrentDelta);
-	if (CurrentDelta != 0.f)
+	const float CurrentDelta = NewRage - OldRage;
+	
+	// Is Server?
+	if (GetOwner()->HasAuthority())
 	{
-		MulticastRageChanged(InstigatorActor, Rage, CurrentDelta);
+		Rage = NewRage;
+
+		if (CurrentDelta != 0.f)
+		{
+			MulticastRageChanged(InstigatorActor, Rage, CurrentDelta);
+		}
 	}
 	
 	return CurrentDelta != 0.f;

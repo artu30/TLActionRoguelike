@@ -130,6 +130,8 @@ void ASCharacter::OnCharacterHealthChanged(AActor* InstigatorActor, USAttributeC
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		DisableInput(PC);
+
+		SetLifeSpan(5.f);
 	}
 	else if (Delta < 0.f)
 	{
