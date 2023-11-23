@@ -78,6 +78,8 @@ public:
 
 	bool HasEnoughRage(float RageCost) const { return Rage >= RageCost; }
 
+	void RemoveRage(AActor* InstigatorActor);
+
 	UFUNCTION(BlueprintCallable)
 	bool Kill(AActor* InstigatorActor);
 	

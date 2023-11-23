@@ -53,6 +53,8 @@ public:
 
 	bool CanTakePowerup(APawn* InstigatorPawn);
 
-	void ApplyCoinsCost(APawn* InstigatorPawn);
+	void ApplyCoinsCost(APawn* InstigatorPawn, int32 CreditsCost);
+
+	FText GetInteractText_Implementation(APawn* InstigatorPawn) override;
 
 };

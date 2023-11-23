@@ -16,6 +16,12 @@ class TLACTIONROGUELIKE_API ASPlayerController : public APlayerController
 
 protected:
 
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> PauseMenuClass;
+
+	UPROPERTY()
+	UUserWidget* PauseMenuInstance;
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerStateChanged OnPlayerStateChanged;
 
@@ -25,5 +31,10 @@ protected:
 	void BlueprintBeginPlayingState();
 
 	void OnRep_PlayerState() override;
+
+	UFUNCTION(BlueprintCallable)
+	void TogglePauseMenu();
+
+	void SetupInputComponent() override;
 	
 };

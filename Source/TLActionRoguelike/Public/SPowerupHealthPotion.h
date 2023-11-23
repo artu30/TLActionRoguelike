@@ -16,7 +16,9 @@ class TLACTIONROGUELIKE_API ASPowerupHealthPotion : public ASPowerup
 
 public:
 	
-	void Interact_Implementation(APawn* InstigatorPawn);
+	void Interact_Implementation(APawn* InstigatorPawn) override;
+
+	FText GetInteractText_Implementation(APawn* InstigatorPawn) override;
 
 protected:
 

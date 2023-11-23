@@ -131,6 +131,11 @@ void ASCharacter::OnCharacterHealthChanged(AActor* InstigatorActor, USAttributeC
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		DisableInput(PC);
 
+		if (AttributeComp)
+		{
+			AttributeComp->RemoveRage(this);
+		}
+		
 		SetLifeSpan(5.f);
 	}
 	else if (Delta < 0.f)

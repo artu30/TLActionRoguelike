@@ -7,7 +7,7 @@ void ASPowerupCoin::Interact_Implementation(APawn* InstigatorPawn)
 		return;
 	}
 	
-	ApplyCoinsCost(InstigatorPawn);
+	ApplyCoinsCost(InstigatorPawn, CreditsCostAmount);
 	
 	HidePoweup();
 }

@@ -91,7 +91,7 @@ bool ASPowerup::CanTakePowerup(APawn* InstigatorPawn)
 	return FMath::Abs(CreditsCostAmount) <= PlayerState->GetNumCredits();
 }
 
-void ASPowerup::ApplyCoinsCost(APawn* InstigatorPawn)
+void ASPowerup::ApplyCoinsCost(APawn* InstigatorPawn, int32 CreditsCost)
 {
 	if (!InstigatorPawn)
 	{
@@ -105,7 +105,12 @@ void ASPowerup::ApplyCoinsCost(APawn* InstigatorPawn)
 		return;
 	}
 
-	PlayerState->ApplyCoinsChange(this, CreditsCostAmount);
+	PlayerState->ApplyCoinsChange(this, CreditsCost);
+}
+
+FText ASPowerup::GetInteractText_Implementation(APawn* InstigatorPawn)
+{
+	return FText::GetEmpty();
 }
 
 void ASPowerup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

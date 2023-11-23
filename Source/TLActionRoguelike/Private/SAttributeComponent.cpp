@@ -113,6 +113,11 @@ bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delt
 
 bool USAttributeComponent::ApplyRageChange(AActor* InstigatorActor, float Delta)
 {
+	if (Delta > 0.f && Health <= 0.f)
+	{
+		return false;
+	}
+	
 	const float OldRage = Rage;
 	const float NewRage = FMath::Clamp(Rage + Delta, 0.f, MaxRage);
 	
@@ -148,6 +153,11 @@ bool USAttributeComponent::FullHeal()
 bool USAttributeComponent::IsAlive() const
 {
 	return Health > 0.f;
+}
+
+void USAttributeComponent::RemoveRage(AActor* InstigatorActor)
+{
+	ApplyRageChange(InstigatorActor, -Rage);
 }
 
 bool USAttributeComponent::Kill(AActor* InstigatorActor)

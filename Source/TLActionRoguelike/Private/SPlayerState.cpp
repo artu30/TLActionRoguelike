@@ -16,15 +16,8 @@ void ASPlayerState::OnRep_Credits(int32 OldCredits)
 void ASPlayerState::ApplyCoinsChange(AActor* InstigatorActor, int32 Delta)
 {
 	int32 OldCredits = Credits;
-	
-	if (Delta > 0.f)
-	{
-		Credits += Delta;
-	}
-	else if (Delta < 0.f && (Credits - Delta > 0))
-	{
-		Credits -= Delta;
-	}
+
+	Credits = FMath::Clamp(Credits + Delta, 0.f, 1000000);
 
 	OnRep_Credits(OldCredits);
 }
