@@ -6,6 +6,7 @@
 #include "SActionComponent.h"
 #include "SAttributeComponent.h"
 #include "SDamagePopupUserWidget.h"
+#include "SPlayerState.h"
 #include "SWorldUserWidget.h"
 #include "AI/SAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -29,7 +30,6 @@ ASAICharacter::ASAICharacter()
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
 	GetMesh()->SetGenerateOverlapEvents(true);
 }
 
@@ -117,6 +117,16 @@ void ASAICharacter::OnAICharacterHealthChanged(AActor* InstigatorActor, USAttrib
 		return;
 	}
 
+	APawn* InstigatorPawn = Cast<APawn>(InstigatorActor);
+	if (InstigatorPawn)
+	{
+		ASPlayerState* InstigatorPLayerState = Cast<ASPlayerState>(InstigatorPawn->GetPlayerState());
+		if (InstigatorPLayerState)
+		{
+			InstigatorPLayerState->ApplyCoinsChange(this, killReward);
+		}
+	}
+	
 	// Stop BT
 	AAIController* AIController = Cast<AAIController>(GetController());
 	if (AIController)

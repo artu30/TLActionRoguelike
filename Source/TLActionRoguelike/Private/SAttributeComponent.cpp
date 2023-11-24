@@ -89,17 +89,6 @@ bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delt
 			{
 				GameMode->OnActorKilled(GetOwner(), InstigatorActor);
 			}
-
-			APawn* InstigatorPawn = Cast<APawn>(InstigatorActor);
-			if (InstigatorPawn)
-			{
-				ASAICharacter* AIVictim = Cast<ASAICharacter>(GetOwner());
-				ASPlayerState* InstigatorPLayerState = Cast<ASPlayerState>(InstigatorPawn->GetPlayerState());
-				if (AIVictim && InstigatorPLayerState)
-				{
-					InstigatorPLayerState->ApplyCoinsChange(AIVictim, CoinsOnDeathAmount);
-				}
-			}
 		}
 	}
 	

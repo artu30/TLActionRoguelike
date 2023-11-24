@@ -23,6 +23,8 @@ public:
 
 	AActor* GetTargetActor() const;
 
+	void SetKillReward(float NewReward) { killReward = NewReward; }
+
 protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
@@ -54,6 +56,8 @@ protected:
 
 	UPROPERTY()
 	USDamagePopupUserWidget* DamagePopUp;
+
+	float killReward = 0.f;
 	
 	virtual void PostInitializeComponents() override;
 	

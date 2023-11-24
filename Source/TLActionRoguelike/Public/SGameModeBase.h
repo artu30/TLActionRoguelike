@@ -4,12 +4,15 @@
 #include "SPowerup.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "GameFramework/GameModeBase.h"
+#include "Engine/DataTable.h"
 #include "SGameModeBase.generated.h"
 
 class UEnvQuery;
 class UEnvQueryInstanceBlueprintWrapper;
 class UCurveFloat;
 class USSaveGame;
+class UDataTable;
+class USMonsterData;
 
 USTRUCT(BlueprintType)
 struct FSPowerupData
@@ -21,6 +24,37 @@ struct FSPowerupData
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ASPowerup> PowerupClass;
+};
+
+/* DataTable Row for spawning monster in game mode */
+USTRUCT(BlueprintType)
+struct FMonsterInfoRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	FMonsterInfoRow()
+	{
+		Weight = 1.f;
+		SpawnCost = 5.f;
+		KillReward = 20.f;
+	}
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FPrimaryAssetId MonsterId;
+	//TSubclassOf<AActor> MonsterClass;
+	
+	/* Relative chance to pick this monster. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Weight;
+
+	/* Points required by gamemode to spawn this unit. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float SpawnCost;
+
+	/* Amount of credits awarded to killer of this unit. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float KillReward;
+	
 };
 
 /**
@@ -42,9 +76,6 @@ protected:
 	UEnvQuery* SpawnBotQuery;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	TSubclassOf<AActor> MinionClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	UCurveFloat* DifficultyCurve;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI", meta = (EditCondition = "DifficultyCurve == nullptr"))
@@ -64,6 +95,9 @@ protected:
 
 	FString SlotName = "SaveGame01";
 
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	UDataTable* MonsterTable;
+
 	UFUNCTION()
 	void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
 
@@ -77,6 +111,8 @@ protected:
 	void SpawnBotTimerElapsed();
 
 	void SpawnPowerups();
+
+	void OnMonsterLoaded(FPrimaryAssetId LoadedId, FVector SpawnLocation, float KillReward);
 	
 public:
 
