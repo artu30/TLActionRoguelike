@@ -1,5 +1,7 @@
 #include "SPlayerController.h"
 
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
 
 void ASPlayerController::BeginPlayingState()
@@ -41,5 +43,21 @@ void ASPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
+	// New Enhanced Input system
+	UEnhancedInputComponent* InputComp = Cast<UEnhancedInputComponent>(InputComponent);
+	
+	InputComp->BindAction(Input_PauseMenu, ETriggerEvent::Triggered, this, &ASPlayerController::TogglePauseMenu);
+	InputComp->BindAction(Input_AnyKey, ETriggerEvent::Triggered, this, &ASPlayerController::AnyKeyInput);
+	
+	/* OLD INPUT
 	InputComponent->BindAction("PauseMenu", IE_Pressed, this, &ASPlayerController::TogglePauseMenu);
+
+	// Keeping as 'old' input for now until we figure out how to do this easily in Enhanced input
+	InputComponent->BindAction("AnyKey", IE_Pressed, this, &ASPlayerController::AnyKeyInput);
+	*/
+}
+
+void ASPlayerController::AnyKeyInput()
+{
+	bIsUsingGamepad = false;
 }

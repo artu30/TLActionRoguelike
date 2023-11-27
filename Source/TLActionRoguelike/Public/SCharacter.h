@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EnhancedInputSubsystemInterface.h"
 #include "GameFramework/Character.h"
 #include "SCharacter.generated.h"
 
@@ -41,12 +42,52 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SProjectile")
 	UParticleSystem* CastSpellHandleVFX;
 
+	// Input ----------------------------------------
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputMappingContext* DefaultInputMapping;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_Move;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_Jump;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_Interact;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_Sprint;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_LookMouse;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_LookStick;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_PrimaryAttack;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_SecondaryAttack;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_Dash;
+	// Input ----------------------------------------
+	
+	FTraceHandle TraceHandle;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	void MoveForward(float Value);
+	void FindCrosshairTarget();
 
-	void MoveRight(float Value);
+	void CrosshairTraceComplete(const FTraceHandle& InTraceHandle, FTraceDatum& InTraceDatum);
+	
+	void Move(const FInputActionInstance& Instance);
+
+	void LookMouse(const FInputActionValue& InputValue);
+
+	void LookStick(const FInputActionValue& InputValue);
 
 	void PrimaryAttack();
 	void BlackholeAttack();
@@ -76,5 +117,9 @@ public:
 
 	UFUNCTION(Exec)
 	void HealSelf(float Amount = 100.f);
+
+private:
+
+	bool bHasPawnTarget;
 
 };

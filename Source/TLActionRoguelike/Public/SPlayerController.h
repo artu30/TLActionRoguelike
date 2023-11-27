@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputAction.h"
 #include "GameFramework/PlayerController.h"
 #include "SPlayerController.generated.h"
 
@@ -25,6 +26,12 @@ protected:
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerStateChanged OnPlayerStateChanged;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_PauseMenu;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_AnyKey;
+
 	virtual void BeginPlayingState() override;
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -36,5 +43,20 @@ protected:
 	void TogglePauseMenu();
 
 	void SetupInputComponent() override;
+
+	void AnyKeyInput();
+
+public:
+
+	UFUNCTION(BlueprintPure, Category= "Input")
+	bool IsUsingGamepad() const
+	{
+		return bIsUsingGamepad;
+	}
+
+private:
+
+	/* Was any input recently using GamePad */
+	bool bIsUsingGamepad;
 	
 };

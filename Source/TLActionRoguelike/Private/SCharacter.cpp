@@ -1,16 +1,17 @@
 #include "SCharacter.h"
 
-#include "DrawDebugHelpers.h"
 #include "SActionComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "SInteractionComponent.h"
 #include "SAttributeComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "SPlayerController.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -44,24 +45,109 @@ void ASCharacter::BeginPlay()
 	AttributeComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnCharacterHealthChanged);
 }
 
-void ASCharacter::MoveForward(float Value)
+void ASCharacter::FindCrosshairTarget()
 {
-	FRotator ControlRot = GetControlRotation();
-	ControlRot.Pitch = 0.f;
-	ControlRot.Roll = 0.f;
+	// Ignore if not using GamePad
+	ASPlayerController* PlayerController = Cast<ASPlayerController>(GetController());
+
+	// Only use aim assist when currently controlled and using gamepad
+	// Note: you *may* always want to line trace if using this result for other things like coloring crosshair or re-using this hit data for aim adjusting during projectile attacks
+	if (PlayerController == nullptr || !PlayerController->IsUsingGamepad())
+	{
+		bHasPawnTarget = false;
+		return;
+	}
+
+	FVector EyeLocation;
+	FRotator EyeRotation;
+	GetActorEyesViewPoint(EyeLocation, EyeRotation);
+
+	const float AimAssistDistance = 5000.f;
+	const FVector TraceEnd = EyeLocation + (EyeRotation.Vector() * AimAssistDistance);
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	FCollisionShape Shape;
+	Shape.SetSphere(50.f);
+
+	// Called next frame when the trace has completed
+	FTraceDelegate Delegate = FTraceDelegate::CreateUObject(this, &ASCharacter::CrosshairTraceComplete);
 	
-	AddMovementInput(ControlRot.Vector(), Value);
+	TraceHandle = GetWorld()->AsyncSweepByChannel(EAsyncTraceType::Single, EyeLocation, TraceEnd, FQuat::Identity, ECC_Pawn, Shape, Params, FCollisionResponseParams::DefaultResponseParam, &Delegate);
 }
 
-void ASCharacter::MoveRight(float Value)
+
+void ASCharacter::CrosshairTraceComplete(const FTraceHandle& InTraceHandle, FTraceDatum& InTraceDatum)
+{
+	// at most expect one hit
+	if (InTraceDatum.OutHits.IsValidIndex(0))
+	{
+		FHitResult Hit = InTraceDatum.OutHits[0];
+		// Figure out if dealing with a Pawn, may want aim assist on other 'things', which requires a different check
+		bHasPawnTarget = Hit.IsValidBlockingHit() && Hit.GetActor()->IsA(APawn::StaticClass());
+	}
+}
+
+void ASCharacter::Move(const FInputActionInstance& Instance)
 {
 	FRotator ControlRot = GetControlRotation();
 	ControlRot.Pitch = 0.f;
 	ControlRot.Roll = 0.f;
 
-	FVector RightVector = UKismetMathLibrary::GetRightVector(ControlRot);
-	
-	AddMovementInput(RightVector, Value);
+	// Get value from input (combined value from WASD keys or single Gamepad stick) and convert to Vector (x,y)
+	const FVector2d AxisValue = Instance.GetValue().Get<FVector2d>();
+
+	// Move forward/back
+	AddMovementInput(ControlRot.Vector(), AxisValue.Y);
+
+	// Move right/left strafe
+	const FVector RightVector = FRotationMatrix(ControlRot).GetScaledAxis(EAxis::Y);
+	AddMovementInput(RightVector, AxisValue.X);
+}
+
+void ASCharacter::LookMouse(const FInputActionValue& InputValue)
+{
+	const FVector2d Value = InputValue.Get<FVector2d>();
+
+	AddControllerYawInput(Value.X);
+	AddControllerPitchInput(Value.Y);
+}
+
+void ASCharacter::LookStick(const FInputActionValue& InputValue)
+{
+	FVector2D Value = InputValue.Get<FVector2D>();
+
+	// Track negative as we'll lose this during the conversion
+	bool XNegative = Value.X < 0.f;
+	bool YNegative = Value.Y < 0.f;
+
+	// Can further modify with 'sensitivity' settings
+	static const float LookYawRate = 100.0f;
+	static const float LookPitchRate = 50.0f;
+
+	// non-linear to make aiming a little easier
+	Value = Value * Value;
+
+	if (XNegative)
+	{
+		Value.X *= -1.f;
+	}
+	if (YNegative)
+	{
+		Value.Y *= -1.f;
+	}
+
+	// Aim assist
+	// todo: may need to ease this out and/or change strength based on distance to target
+	float RateMultiplier = 1.0f;
+	if (bHasPawnTarget)
+	{
+		RateMultiplier = 0.5f;
+	}
+
+	AddControllerYawInput(Value.X * (LookYawRate * RateMultiplier) * GetWorld()->GetDeltaSeconds());
+	AddControllerPitchInput(Value.Y * (LookPitchRate * RateMultiplier) * GetWorld()->GetDeltaSeconds());
 }
 
 void ASCharacter::PrimaryAttack()
@@ -154,21 +240,7 @@ void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// -- Rotation Visualization -- //
-	const float DrawScale = 100.0f;
-	const float Thickness = 5.0f;
-
-	FVector LineStart = GetActorLocation();
-	// Offset to the right of pawn
-	LineStart += GetActorRightVector() * 100.0f;
-	// Set line end in direction of the actor's forward
-	const FVector ActorDirection_LineEnd = LineStart + (GetActorForwardVector() * 100.0f);
-	// Draw Actor's Direction
-	DrawDebugDirectionalArrow(GetWorld(), LineStart, ActorDirection_LineEnd, DrawScale, FColor::Yellow, false, 0.0f, 0, Thickness);
-
-	const FVector ControllerDirection_LineEnd = LineStart + (GetControlRotation().Vector() * 100.0f);
-	// Draw 'Controller' Rotation ('PlayerController' that 'possessed' this character)
-	DrawDebugDirectionalArrow(GetWorld(), LineStart, ControllerDirection_LineEnd, DrawScale, FColor::Green, false, 0.0f, 0, Thickness);
+	FindCrosshairTarget();
 }
 
 // Called to bind functionality to input
@@ -176,22 +248,57 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ASCharacter::MoveForward);
-	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ASCharacter::MoveRight);
+	const APlayerController* PlayerController = GetController<APlayerController>();
+	const ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
 
-	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &APawn::AddControllerPitchInput);
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	check(Subsystem);
 
-	PlayerInputComponent->BindAction(TEXT("PrimaryAttack"), IE_Pressed, this, &ASCharacter::PrimaryAttack);
-	PlayerInputComponent->BindAction(TEXT("BlackholeAttack"), IE_Pressed, this, &ASCharacter::BlackholeAttack);
-	PlayerInputComponent->BindAction(TEXT("TeleportAttack"), IE_Pressed, this, &ASCharacter::TeleportAttack);
+	Subsystem->ClearAllMappings();
 
-	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ASCharacter::Jump);
+	// Add mappings for our game, more complex games may have multiple contexts that are added/removed at runtime
+	Subsystem->AddMappingContext(DefaultInputMapping, 0);
 
-	PlayerInputComponent->BindAction(TEXT("PrimaryInteract"), IE_Pressed, this, &ASCharacter::PrimaryInteract);
+	// New Enhanced Input system
+	UEnhancedInputComponent* InputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Pressed, this, &ASCharacter::SprintStart);
-	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Released, this, &ASCharacter::SprintStop);
+	// General
+	InputComp->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ASCharacter::Move);
+	InputComp->BindAction(Input_Jump, ETriggerEvent::Triggered, this, &ASCharacter::Jump);
+	InputComp->BindAction(Input_Interact, ETriggerEvent::Triggered, this, &ASCharacter::PrimaryInteract);
+
+	// Sprint while key is held
+	InputComp->BindAction(Input_Sprint, ETriggerEvent::Started, this, &ASCharacter::SprintStart);
+	InputComp->BindAction(Input_Sprint, ETriggerEvent::Completed, this, &ASCharacter::SprintStop);
+
+	// MKB
+	InputComp->BindAction(Input_LookMouse, ETriggerEvent::Triggered, this, &ASCharacter::LookMouse);
+	// Gamepad
+	InputComp->BindAction(Input_LookStick, ETriggerEvent::Triggered, this, &ASCharacter::LookStick);
+
+	// Abilities
+	InputComp->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, &ASCharacter::PrimaryAttack);
+	InputComp->BindAction(Input_SecondaryAttack, ETriggerEvent::Triggered, this, &ASCharacter::BlackholeAttack);
+	InputComp->BindAction(Input_Dash, ETriggerEvent::Triggered, this, &ASCharacter::TeleportAttack);
+	
+	/* OLD INPUT
+	InputComp->BindAxis(TEXT("MoveForward"), this, &ASCharacter::MoveForward);
+	InputComp->BindAxis(TEXT("MoveRight"), this, &ASCharacter::MoveRight);
+
+	InputComp->BindAxis(TEXT("Turn"), this, &APawn::AddControllerYawInput);
+	InputComp->BindAxis(TEXT("LookUp"), this, &APawn::AddControllerPitchInput);
+
+	InputComp->BindAction(TEXT("PrimaryAttack"), IE_Pressed, this, &ASCharacter::PrimaryAttack);
+	InputComp->BindAction(TEXT("BlackholeAttack"), IE_Pressed, this, &ASCharacter::BlackholeAttack);
+	InputComp->BindAction(TEXT("TeleportAttack"), IE_Pressed, this, &ASCharacter::TeleportAttack);
+
+	InputComp->BindAction(TEXT("Jump"), IE_Pressed, this, &ASCharacter::Jump);
+
+	InputComp->BindAction(TEXT("PrimaryInteract"), IE_Pressed, this, &ASCharacter::PrimaryInteract);
+
+	InputComp->BindAction(TEXT("Sprint"), IE_Pressed, this, &ASCharacter::SprintStart);
+	InputComp->BindAction(TEXT("Sprint"), IE_Released, this, &ASCharacter::SprintStop);
+	*/
 }
 
 USAttributeComponent* ASCharacter::GetAttributeComponent() const
